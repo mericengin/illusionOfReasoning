@@ -1,0 +1,24 @@
+All cats are mammals. All mammals are animals. Therefore, all cats are animals.
+Some apples are red. All red things are sweet. Therefore, some apples are sweet.
+All birds have feathers. All robins are birds. Therefore, all robins have feathers.
+All squares are rectangles. All rectangles are polygons. Therefore, all squares are polygons.
+All doctors study medicine. Surgeons are doctors. Therefore, surgeons study medicine.
+All cars have wheels. Sedans are cars. Therefore, sedans have wheels.
+All rivers flow downhill. The Amazon is a river. Therefore, the Amazon flows downhill.
+All planets orbit a star. Earth is a planet. Therefore, Earth orbits a star.
+All insects have six legs. Ants are insects. Therefore, ants have six legs.
+No fish have lungs. All trout are fish. Therefore, no trout have lungs.
+No mammals are cold-blooded. All whales are mammals. Therefore, no whales are cold-blooded.
+No odd numbers are divisible by two. Seven is an odd number. Therefore, seven is not divisible by two.
+No reptiles have fur. All snakes are reptiles. Therefore, no snakes have fur.
+No vegetarians eat meat. John is a vegetarian. Therefore, John does not eat meat.
+Some dogs are poodles. All poodles are energetic. Therefore, some dogs are energetic.
+Some students are athletes. All athletes exercise. Therefore, some students exercise.
+Some books are fiction. All fiction requires imagination. Therefore, some books require imagination.
+Some trees are evergreens. All evergreens keep their leaves in winter. Therefore, some trees keep their leaves in winter.
+Some metals are magnetic. All magnetic objects attract iron. Therefore, some metals attract iron.
+All birds lay eggs. A platypus lays eggs. Therefore, a platypus is a bird.
+All fish swim. Dolphins swim. Therefore, dolphins are fish.
+Some politicians are wealthy. Some wealthy people own yachts. Therefore, some politicians own yachts.
+All successful people work hard. John works hard. Therefore, John is successful.
+All roses are flowers. Some flowers fade quickly. Therefore, all roses fade quickly.
