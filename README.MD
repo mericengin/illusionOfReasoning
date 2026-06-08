@@ -36,3 +36,12 @@ By zeroing out the statistical weight of the substantive tokens, the model is fo
 ├── .gitignore
 ├── README.MD
 └── requirements.txt
+
+Installation & Setup
+Clone the repository and set up your virtual environment:
+
+# On macOS/Linux:
+source venv/bin/activate
+
+# On Windows:
+venv\Scripts\activate
