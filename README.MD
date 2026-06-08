@@ -36,3 +36,33 @@ By zeroing out the statistical weight of the substantive tokens, the model is fo
 ├── .gitignore
 ├── README.MD
 └── requirements.txt
+
+## Installation & Setup
+
+1. Clone the repository and set up your environment:
+
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+
+2. Configure Authentication: Create a .env file in the root directory and add your API key for each LLM API (GPT, Gemini, Claude, etc:
+
+OPENAI_API_KEY="sk-your-api-key"
+...
+
+## Execution Pipeline
+
+1. Data Generation
+Run the scrambling script to generate the parallel OOV dataset:
+
+python scrambler.py
+
+Compile the text arrays into a target DataFrame:
+
+python build_dataframe.py
+
+2. Inference
+Execute the zero-shot prompting pipeline against the specified LLM endpoint (default: gpt-4o-mini). The script utilizes deterministic parameters (temperature=0.0).
+
+python main.py
+
+3. Evaluation
