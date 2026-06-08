@@ -39,7 +39,7 @@ def scramble_syllogism(text):
 
     return "".join(scrambled_tokens)
 
-file_path = os.path.join("data", "syllogisms.txt")
+file_path = os.path.join("data/texts", "syllogisms.txt")
 
 try:
     with open(file_path, "r", encoding="utf-8") as file:

@@ -4,13 +4,13 @@ import numpy as np
 def build_dataframe():
     syllogisms = []
     scrambled_syllogisms = []
-    with open("data/syllogisms.txt", "r") as f:
+    with open("data/texts/syllogisms.txt", "r") as f:
         for line in f.readlines():
             clean_line = line.strip()
             if clean_line:
                 syllogisms.append(clean_line)
 
-    with open("data/syllogisms_scrambled.txt", "r") as f:
+    with open("data/texts/syllogisms_scrambled.txt", "r") as f:
         for line in f.readlines():
             clean_line = line.strip()
             if clean_line:
