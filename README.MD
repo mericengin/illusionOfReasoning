@@ -42,30 +42,40 @@ By zeroing out the statistical weight of the substantive tokens, the model is fo
 
 1. Clone the repository and set up your virtual environment:
 
+```text
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
+```
 
 2. **Configure Authentication:** Create a .env file in the root directory and add your API key (for each LLM you want to try out):
 
+```text
 OPENAI_API_KEY="sk-your-api-key"
 ...
+```
 
 ## Execution Pipeline
 
 1. Data Generation 
 Run the scrambling script to generate the parallel OOV dataset:
 
+```text
 python scrambler.py
+```
 
 Compile the text arrays into a target DataFrame:
 
+```text
 python processing.py
+```
 
 2. Inference
 
 Execute the zero-shot prompting pipeline against the specified LLM endpoint (default: gpt-4o-mini). The script utilizes deterministic parameters (temperature=0.0).
 
-python run_inference.py
+```text
+python main.py
+```
 
 **Note:** Once inference completes, you must manually add a ground_truth column to data/results.csv labeling each row as strictly VALID or INVALID before running the evaluation.
 
@@ -83,4 +93,6 @@ A statistically significant $\Delta > 0$ indicates a reliance on distributional 
 
 To calculate and output the final metrics:
 
+```text
 python evaluation.py
+```
