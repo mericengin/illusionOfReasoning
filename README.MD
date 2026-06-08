@@ -36,3 +36,51 @@ By zeroing out the statistical weight of the substantive tokens, the model is fo
 ├── .gitignore
 ├── README.MD
 └── requirements.txt
+```
+
+## Installation & Setup
+
+1. Clone the repository and set up your virtual environment:
+
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+
+2. **Configure Authentication:** Create a .env file in the root directory and add your API key (for each LLM you want to try out):
+
+OPENAI_API_KEY="sk-your-api-key"
+...
+
+## Execution Pipeline
+
+1. Data Generation 
+Run the scrambling script to generate the parallel OOV dataset:
+
+python scrambler.py
+
+Compile the text arrays into a target DataFrame:
+
+python processing.py
+
+2. Inference
+
+Execute the zero-shot prompting pipeline against the specified LLM endpoint (default: gpt-4o-mini). The script utilizes deterministic parameters (temperature=0.0).
+
+python run_inference.py
+
+**Note:** Once inference completes, you must manually add a ground_truth column to data/results.csv labeling each row as strictly VALID or INVALID before running the evaluation.
+
+3. Evaluation
+
+The evaluation script computes the model accuracy for both distributions. Given $N$ samples, accuracy is defined as the mean of the indicator function where the predicted label $\hat{y}_i$ matches the ground truth $y_i$:
+
+$$Acc = \frac{1}{N}\sum_{i=1}^{N} \mathbb{I}(\hat{y}_i = y_i)$$
+
+The primary evaluation metric is the performance delta ($\Delta$) between the standard and scrambled distributions:
+
+$$\Delta = Acc_{standard} - Acc_{scrambled}$$
+
+A statistically significant $\Delta > 0$ indicates a reliance on distributional semantics rather than robust content-neutral parsing.
+
+To calculate and output the final metrics:
+
+python evaluation.py
