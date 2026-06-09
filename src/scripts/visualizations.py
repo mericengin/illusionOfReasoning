@@ -20,7 +20,7 @@ def create_visualizations():
     models = {
         'GPT-4o-Mini': ('pred_standard_gpt-4o-mini', 'pred_scrambled_gpt-4o-mini'),
         'Gemini Flash Lite': ('pred_standard_gemini-flash-lite', 'pred_scrambled_gemini-flash-lite'),
-        'GPT-5 Mini': ('pred_standard_gpt-5-mini', 'pred_scrambled_gpt-5-mini') 
+        'GPT-5 Mini': ('pred_standard_gpt-5-mini', 'pred_scrambled_gpt-5-mini'),
     }
 
     results_data = []
