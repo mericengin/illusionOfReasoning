@@ -40,16 +40,27 @@ def create_full_visualizations():
     
     gain_df = pd.DataFrame(gain_data)
     plt.figure(figsize=(8, 4))
-    sns.barplot(data=gain_df, x='Model', y='Gain (%)', palette='coolwarm')
+    
+    # FIX 1: Use distinct colors, add a border edge, and label the bars
+    ax2 = sns.barplot(data=gain_df, x='Model', y='Gain (%)', palette=['#4C72B0', '#C44E52', '#55A868'], edgecolor='black', linewidth=1, hue='Model', legend=False)
     plt.title('Performance Gain on Scrambled Logic via CoT', fontsize=14)
+    for container in ax2.containers:
+        ax2.bar_label(container, fmt='%+.1f%%', padding=3)
     plt.savefig('data/cot_gain_analysis.png', dpi=300)
 
     # Chart 3: Robustness Scatter Plot
     plt.figure(figsize=(8, 8))
+    
+    # FIX 2: Define manual offsets and different shapes to prevent overlapping points
+    visual_offsets = {'GPT-4o-Mini': 0, 'Gemini Flash Lite': -0.3, 'GPT-5 Mini': 0.3}
+    markers = {'GPT-4o-Mini': 'o', 'Gemini Flash Lite': 's', 'GPT-5 Mini': '^'}
+
     for model, (z_std, z_scr, c_std, c_scr) in models.items():
         std_acc = (df_cot[c_std] == df_cot['ground_truth']).mean() * 100
         scr_acc = (df_cot[c_scr] == df_cot['ground_truth']).mean() * 100
-        plt.scatter(std_acc, scr_acc, label=model, s=100)
+        
+        # Apply the visual offset to the X-axis so Gemini and GPT-5 sit side-by-side
+        plt.scatter(std_acc + visual_offsets[model], scr_acc, label=model, s=150, marker=markers[model], alpha=0.8, edgecolor='black')
     
     plt.plot([60, 100], [60, 100], 'k--', label='Perfect Robustness')
     plt.xlabel('Standard Accuracy (%)')
