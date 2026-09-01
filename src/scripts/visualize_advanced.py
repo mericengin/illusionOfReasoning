@@ -1,13 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 def create_advanced_visualizations():
-    # Load both datasets to compare the new runs against the original English baseline
-    df_adv = pd.read_csv("data/results_advanced.csv")
-    df_base = pd.read_csv("data/results.csv")
+    try:
+        df_adv = pd.read_csv("data/results_advanced.csv")
+        # FIXED: Strictly take the 24 standard rows for baseline English comparison
+        df_base = pd.read_csv("data/results.csv").head(24)
+    except FileNotFoundError as e:
+        print(f"Error loading CSV files: {e}")
+        return
 
-    # Map the column names for each model across the two datasets
     models = {
         'GPT-4o-Mini': {
             'base_en': 'pred_standard_gpt-4o-mini',
@@ -30,13 +34,11 @@ def create_advanced_visualizations():
     }
 
     # --- 1. Data Prep: Cross-Lingual ---
-    df_adv_std = df_adv[df_adv['type'] == 'standard']
+    df_adv_std = df_adv[df_adv['type'] == 'standard'].head(24)
     lang_data = []
 
     for model_name, cols in models.items():
-        # English baseline
         acc_en = (df_base[cols['base_en']] == df_base['ground_truth']).mean() * 100
-        # German and Turkish translations
         acc_de = (df_adv_std[cols['adv_de']] == df_adv_std['ground_truth']).mean() * 100
         acc_tr = (df_adv_std[cols['adv_tr']] == df_adv_std['ground_truth']).mean() * 100
 
@@ -51,7 +53,6 @@ def create_advanced_visualizations():
     bb_data = []
 
     for model_name, cols in models.items():
-        # Compare baseline English logic against Belief Bias logic
         acc_en = (df_base[cols['base_en']] == df_base['ground_truth']).mean() * 100
         acc_bb = (df_bb[cols['adv_bb']] == df_bb['ground_truth']).mean() * 100
 
@@ -60,7 +61,6 @@ def create_advanced_visualizations():
             {'Model': model_name, 'Condition': 'Belief Bias', 'Accuracy': acc_bb}
         ])
 
-    # --- PLOTTING ---
     sns.set_theme(style="whitegrid")
 
     # Chart 1: Cross-Lingual Grouped Bar
@@ -73,6 +73,8 @@ def create_advanced_visualizations():
         ax1.bar_label(container, fmt='%.1f%%', padding=3)
     plt.tight_layout()
     plt.savefig('data/cross_lingual_accuracy.png', dpi=300)
+    plt.close()
+    print("Saved: data/cross_lingual_accuracy.png")
 
     # Chart 2: Belief Bias Grouped Bar
     plt.figure(figsize=(9, 6))
@@ -84,8 +86,8 @@ def create_advanced_visualizations():
         ax2.bar_label(container, fmt='%.1f%%', padding=3)
     plt.tight_layout()
     plt.savefig('data/belief_bias_vulnerability.png', dpi=300)
-
-    print("Advanced visualizations saved successfully to the /data folder!")
+    plt.close()
+    print("Saved: data/belief_bias_vulnerability.png")
 
 if __name__ == "__main__":
     create_advanced_visualizations()

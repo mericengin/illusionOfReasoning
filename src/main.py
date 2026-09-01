@@ -4,84 +4,85 @@ from google import genai
 from google.genai import types
 import time
 import os
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- Client Initialization ---
 openai_client = OpenAI()
 gemini_client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-# --- Prompt Template ---
-PROMPT_TEMPLATE = """You are a strictly logical evaluation system. Read the premises and determine if the conclusion is logically VALID or INVALID. Reply ONLY with the exact word 'VALID' or 'INVALID'.
+def extract_label(text):
+    matches = re.findall(r'\b(VALID|INVALID)\b', text.upper())
+    return matches[-1] if matches else "ERROR"
 
-Syllogism:
-{text}
-
-Answer:"""
-
-# --- Inference Functions ---
-def get_openai_response(text):
-    prompt = PROMPT_TEMPLATE.format(text=text)
-    try:
-        response = openai_client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0,
-            max_tokens=2
-        )
-        return response.choices[0].message.content.strip().upper()
-    except Exception as e:
-        print(f"OpenAI API Error: {e}")
-        return "ERROR"
+def get_openai_response(text, model_string):
+    if pd.isna(text) or text == "N/A": return "N/A"
+    
+    prompt = f"You are a strictly logical evaluation system. Read the premises and determine if the conclusion is logically VALID or INVALID. Reply ONLY with the exact word 'VALID' or 'INVALID'.\n\nSyllogism:\n{text}\n\nAnswer:"
+    messages = [{"role": "user", "content": prompt}]
+    
+    while True:
+        try:
+            kwargs = {"model": model_string, "messages": messages}
+            if model_string != 'gpt-5-mini': # GPT-5 Mini rejects temperature/max_tokens
+                kwargs["temperature"] = 0.0
+                kwargs["max_completion_tokens"] = 10
+                
+            response = openai_client.chat.completions.create(**kwargs)
+            ans = extract_label(response.choices[0].message.content)
+            if ans in ["VALID", "INVALID"]:
+                return ans
+        except Exception as e:
+            print(f"  [OpenAI Rate Limit] Waiting 3s... ({e})")
+            time.sleep(3)
 
 def get_gemini_response(text):
-    prompt = PROMPT_TEMPLATE.format(text=text)
-    try:
-        response = gemini_client.models.generate_content(
-            model='gemini-flash-lite-latest', 
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=0.0,
-                max_output_tokens=2,
-            )
-        )
-        return response.text.strip().upper()
-    except Exception as e:
-        print(f"Gemini API Error: {e}")
-        return "ERROR"
-
-# --- Main Execution ---
-def run_inference():
-    # 1. Read from the clean baseline dataset
-    df = pd.read_csv("data/data.csv")
+    if pd.isna(text) or text == "N/A": return "N/A"
     
-    # 2. Initialize all four output columns
-    df['pred_standard_gpt-4o-mini'] = ""
-    df['pred_scrambled_gpt-4o-mini'] = ""
+    prompt = f"You are a strictly logical evaluation system. Read the premises and determine if the conclusion is logically VALID or INVALID. Reply ONLY with the exact word 'VALID' or 'INVALID'.\n\nSyllogism:\n{text}\n\nAnswer:"
+    
+    while True:
+        try:
+            response = gemini_client.models.generate_content(
+                model='gemini-flash-lite-latest', 
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=0.0, max_output_tokens=10)
+            )
+            ans = extract_label(response.text)
+            if ans in ["VALID", "INVALID"]:
+                return ans
+        except Exception as e:
+            print(f"  [Gemini Rate Limit] Waiting 6s... ({e})")
+            time.sleep(6)
+
+def run_inference():
+    df = pd.read_csv("data/data.csv")
+    models = ['gpt-4o-mini', 'gpt-5-mini']
+    
+    for m in models:
+        df[f'pred_standard_{m}'] = ""
+        df[f'pred_scrambled_{m}'] = ""
     df['pred_standard_gemini-flash-lite'] = ""
     df['pred_scrambled_gemini-flash-lite'] = ""
 
+    print("Starting Baseline Inference...")
     for index, row in df.iterrows():
         print(f"Processing row {index}...")
         
-        # --- OpenAI Inference ---
-        df.at[index, 'pred_standard_gpt-4o-mini'] = get_openai_response(row['syllogism'])
-        time.sleep(0.5) 
+        # OpenAI Models
+        for m in models:
+            df.at[index, f'pred_standard_{m}'] = get_openai_response(row['syllogism_en'], m)
+            df.at[index, f'pred_scrambled_{m}'] = get_openai_response(row['scrambled_en'], m)
         
-        df.at[index, 'pred_scrambled_gpt-4o-mini'] = get_openai_response(row['scrambled_syllogisms'])
-        time.sleep(0.5)
+        # Gemini Model
+        df.at[index, 'pred_standard_gemini-flash-lite'] = get_gemini_response(row['syllogism_en'])
+        time.sleep(4.5) 
+        df.at[index, 'pred_scrambled_gemini-flash-lite'] = get_gemini_response(row['scrambled_en'])
+        time.sleep(4.5)
         
-        # --- Gemini Inference ---
-        df.at[index, 'pred_standard_gemini-flash-lite'] = get_gemini_response(row['syllogism'])
-        time.sleep(4.1) # 4.1s buffer to stay under 15 requests/minute free tier limit
-        
-        df.at[index, 'pred_scrambled_gemini-flash-lite'] = get_gemini_response(row['scrambled_syllogisms'])
-        time.sleep(4.1) # 4.1s buffer to stay under 15 requests/minute free tier limit
-        
-    # 3. Save everything to a single, consolidated results file
     df.to_csv("data/results.csv", index=False)
-    print("\nInference complete. Both models' results saved to data/results.csv")
+    print("\nBaseline inference complete! Saved to data/results.csv")
 
 if __name__ == "__main__":
     run_inference()
